@@ -1,5 +1,6 @@
 ﻿using LineBotDemo.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace LineBotDemo.Controllers;
 
@@ -7,12 +8,13 @@ namespace LineBotDemo.Controllers;
 [ApiController]
 public class LineBotController : Controller
 {
+    private LineBotApp app = new LineBotApp();
+    
     [HttpPost]
     public async Task<IActionResult> Post(WebhookEvent reqeust)
     {
-        
-        Console.WriteLine(reqeust.events[0].type);
-        Console.WriteLine(reqeust.events[0].message.text);
+        await app.RunAsync(reqeust.events);
         return Ok(reqeust);
     }
+
 }

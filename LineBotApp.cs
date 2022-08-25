@@ -1,10 +1,17 @@
 ﻿using System.Xml.Serialization;
 using LineBotDemo.Models;
+using Microsoft.Extensions.Options;
 
 namespace LineBotDemo;
 
 public class LineBotApp
 {
+    public LineProfileUtility lineprofileUtility;
+
+    public LineBotApp()
+    {
+    }
+    
     public async Task RunAsync(IEnumerable<Event> events)
     {
         foreach (var e in events)
@@ -12,8 +19,11 @@ public class LineBotApp
             switch (e.type)
             {
                 case WebhookEventType.message:
+                    await OnMessageAsync(e);
                     break;
                 case WebhookEventType.follow:
+                    Console.WriteLine(e.source.userId+" followed");
+                    await OnFollowAsync(e);
                     break;
                 case WebhookEventType.unfollow:
                     break;
@@ -28,6 +38,9 @@ public class LineBotApp
         switch (ev.message.type)
         {
             case LineMessageType.text:
+                Console.WriteLine(ev.source.userId);
+                var user = await lineprofileUtility.GetUserProfile(ev.source.userId);
+                await lineprofileUtility.ReplyMessageAsync(ev.replyToken, $@"{user.displayName} Test Message");
                 break;
             case LineMessageType.audio:
                 break;
@@ -48,6 +61,8 @@ public class LineBotApp
 
     protected virtual async Task OnFollowAsync(Event ev)
     {
+        var user = await lineprofileUtility.GetUserProfile(ev.source.userId);
+        await lineprofileUtility.ReplyMessageAsync(ev.replyToken, $"@ Hi {user.displayName}, 歡迎加入");
         
     }
 
